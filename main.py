@@ -20,11 +20,12 @@ def index():
 @app.route('/view')
 def view():
     output = []
+    ip = request.remote_addr
     with open(r'log.csv', 'r', newline = '') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             output.append(row)
-    return render_template('view.html', output=output)
+    return render_template('view.html', output = output, ip = ip)
 
 def log(response):
     data = {}
