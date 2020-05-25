@@ -1,4 +1,4 @@
-from flask import Flask, send_file, request, jsonify
+from flask import Flask, send_file, request, jsonify, render_template
 import requests, csv
 
 app = Flask(__name__)
@@ -17,6 +17,15 @@ def index():
     log(response.json())
     return send_file(filename, 'image/gif')
 
+@app.route('/view')
+def view():
+    output = []
+    with open(r'log.csv', 'r', newline = '') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            output.append(row)
+    return render_template('view.html', output=output)
+
 def log(response):
     data = {}
     data['IP Address'] = response['ip']
@@ -29,7 +38,7 @@ def log(response):
     except:
         data['Coordinates'] = 'Not Found'
     data['ISP'] = response['asn']['organisation']
-    with open(r'log.csv', 'a', newline='') as csvfile:
+    with open(r'log.csv', 'a', newline = '') as csvfile:
         fieldnames = ['IP Address', 'City', 'State', 'Country', 'Pin Code', 'Coordinates', 'ISP']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writerow(data)
