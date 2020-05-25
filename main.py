@@ -13,10 +13,14 @@ headers = {
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/receipt')
+def receipt():
     url = "https://ip-geo-location.p.rapidapi.com/ip/" + fetch_ip()
     response = requests.request("GET", url, headers=headers, params=querystring)
     filename = 'pixel.gif'
-    log(response.json())
+    log(response.json(), request.args.get('id'))
     return send_file(filename, 'image/gif')
 
 @app.route('/view')
@@ -32,7 +36,7 @@ def view():
             for row in reader:
                 output.append(row)
     except:
-        output.append("Nobody Visited Yet!")
+        output.append("--------")
     return render_template('view.html', output = output, ip = fetch_ip())
 
 def fetch_ip():
@@ -41,8 +45,9 @@ def fetch_ip():
     else:
        return request.headers.getlist("X-Forwarded-For")[0]
 
-def log(response):
+def log(response, uid = 'Null'):
     data = {}
+    data['ID'] = uid
     data['IP Address'] = response['ip']
     data['City'] = response['city']['name']
     data['State'] = response['area']['name']
@@ -54,7 +59,7 @@ def log(response):
         data['Coordinates'] = 'Not Found'
     data['ISP'] = response['asn']['organisation']
     with open(r'log.csv', 'a', newline = '') as csvfile:
-        fieldnames = ['IP Address', 'City', 'State', 'Country', 'Pin Code', 'Coordinates', 'ISP']
+        fieldnames = ['ID','IP Address', 'City', 'State', 'Country', 'Pin Code', 'Coordinates', 'ISP']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writerow(data)
 
