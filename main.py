@@ -21,10 +21,13 @@ def index():
 def view():
     output = []
     ip = request.remote_addr
-    with open(r'log.csv', 'r', newline = '') as csvfile:
-        reader = csv.reader(csvfile)
-        for row in reader:
-            output.append(row)
+    try:
+        with open(r'log.csv', 'r', newline = '') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                output.append(row)
+    except:
+        output.append("Nobody Visited Yet!")
     return render_template('view.html', output = output, ip = ip)
 
 def log(response):
