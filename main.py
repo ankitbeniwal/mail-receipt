@@ -11,7 +11,7 @@ headers = {
 
 @app.route('/')
 def index():
-    url = "https://ip-geo-location.p.rapidapi.com/ip/" + request.remote_addr
+    url = "https://ip-geo-location.p.rapidapi.com/ip/" + request.environ['REMOTE_ADDR']
     response = requests.request("GET", url, headers=headers, params=querystring)
     filename = 'pixel.gif'
     log(response.json())
@@ -20,7 +20,7 @@ def index():
 @app.route('/view')
 def view():
     output = []
-    ip = request.remote_addr
+    ip = request.environ['REMOTE_ADDR']
     try:
         with open(r'log.csv', 'r', newline = '') as csvfile:
             reader = csv.reader(csvfile)
