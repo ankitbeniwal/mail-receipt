@@ -1,7 +1,9 @@
 from flask import Flask, send_file, request, jsonify, render_template
 import requests, csv
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 querystring = {"format":"json"}
 headers = {
@@ -11,7 +13,7 @@ headers = {
 
 @app.route('/')
 def index():
-    url = "https://ip-geo-location.p.rapidapi.com/ip/" + request.environ['REMOTE_ADDR']
+    url = "https://ip-geo-location.p.rapidapi.com/ip/" + fetch_ip()
     response = requests.request("GET", url, headers=headers, params=querystring)
     filename = 'pixel.gif'
     log(response.json())
@@ -20,7 +22,10 @@ def index():
 @app.route('/view')
 def view():
     output = []
-    ip = request.environ['REMOTE_ADDR']
+    if not request.headers.getlist("X-Forwarded-For"):
+       ip = request.remote_addr
+    else:
+       ip = request.headers.getlist("X-Forwarded-For")[0]
     try:
         with open(r'log.csv', 'r', newline = '') as csvfile:
             reader = csv.reader(csvfile)
@@ -28,7 +33,13 @@ def view():
                 output.append(row)
     except:
         output.append("Nobody Visited Yet!")
-    return render_template('view.html', output = output, ip = ip)
+    return render_template('view.html', output = output, ip = fetch_ip())
+
+def fetch_ip():
+    if not request.headers.getlist("X-Forwarded-For"):
+       return request.remote_addr
+    else:
+       return request.headers.getlist("X-Forwarded-For")[0]
 
 def log(response):
     data = {}
