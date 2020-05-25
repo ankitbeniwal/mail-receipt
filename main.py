@@ -11,7 +11,7 @@ headers = {
 
 @app.route('/')
 def index():
-    url = "https://ip-geo-location.p.rapidapi.com/ip/" + request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    url = "https://ip-geo-location.p.rapidapi.com/ip/" + request.remote_addr
     response = requests.request("GET", url, headers=headers, params=querystring)
     filename = 'pixel.gif'
     log(response.json())
